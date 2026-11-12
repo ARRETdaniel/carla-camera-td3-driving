@@ -1,0 +1,3 @@
+470449460f3caa6519ff3d3b0438f960  T02v2-A_left_j400_waypoints.txt
+f0f839f6de6c5c5943fb72053b1bbd67  T02v2-B_left_j20_waypoints.txt
+c13c7dc7e8d800408f35b6c56cc90f84  T02v2-C_right_j349_waypoints.txt

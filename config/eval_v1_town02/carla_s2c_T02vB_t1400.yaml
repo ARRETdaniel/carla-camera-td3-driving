@@ -1,0 +1,229 @@
+server:
+  host: 'localhost'
+  port: 2000
+  timeout: 60.0
+
+  render_mode: 'offscreen'
+  quality_level: 'Epic'
+  fps: 20
+
+world:
+  map_name: 'Town01'
+
+  synchronous_mode: true
+  fixed_delta_seconds: 0.05
+  no_rendering_mode: false
+
+  weather:
+    cloudiness: 60.0
+    precipitation: 40.0
+    precipitation_deposits: 40.0
+    wind_intensity: 30.0
+    sun_azimuth_angle: 275.0
+    sun_altitude_angle: 20.0
+    fog_density: 5.0
+    fog_distance: 0.75
+    fog_falloff: 0.1
+    wetness: 80.0
+    scattering_intensity: 1.0
+    mie_scattering_scale: 0.03
+    rayleigh_scattering_scale: 0.0331
+    dust_storm: 0.0
+
+  spectator_transform:
+    x: 150.0
+    y: 200.0
+    z: 50.0
+    pitch: -20.0
+    yaw: 0.0
+    roll: 0.0
+
+ego_vehicle:
+  blueprint: 'vehicle.tesla.model3'
+
+  spawn_point:
+    x: 392.0
+    y: 326.0
+    z: 1.0
+    pitch: 0.0
+    yaw: 0.0
+    roll: 0.0
+
+  physics:
+    max_rpm: 5000.0
+    moi: 1.0
+    damping_rate_full_throttle: 0.15
+    damping_rate_zero_throttle_clutch_engaged: 2.0
+    damping_rate_zero_throttle_clutch_disengaged: 0.35
+
+  control:
+    max_steering_angle: 70.0
+    max_throttle: 1.0
+    max_brake: 1.0
+
+  target_speed: 30.0
+
+sensors:
+  camera_rgb:
+    enabled: true
+    blueprint: 'sensor.camera.rgb'
+
+    image_size_x: 336
+    image_size_y: 336
+    fov: 90.0
+    target_size: 84
+
+    transform:
+      x: 0.8
+      y: 0.0
+      z: 1.7
+      pitch: 0.0
+      yaw: 0.0
+      roll: 0.0
+
+    sensor_tick: 0.05
+
+  collision:
+    enabled: true
+    blueprint: 'sensor.other.collision'
+
+  lane_invasion:
+    enabled: true
+    blueprint: 'sensor.other.lane_invasion'
+
+  imu:
+    enabled: true
+    blueprint: 'sensor.other.imu'
+    transform:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      pitch: 0.0
+      yaw: 0.0
+      roll: 0.0
+    sensor_tick: 0.05
+
+traffic:
+  num_vehicles: 50
+  num_pedestrians: 0
+
+  vehicle_behavior:
+    safe: true
+    aggressive: false
+    seed: 42
+
+  spawn:
+    all_vehicles_spawn: false
+    safe_spawn: true
+    car_lights_on: true
+
+  traffic_manager:
+    port: 8000
+    synchronous_mode: true
+    hybrid_physics_mode: true
+    hybrid_physics_radius: 70.0
+
+    global_distance_to_leading_vehicle: 2.0
+    global_percentage_speed_difference: 30.0
+    auto_lane_change: true
+    distance_to_lane_change: 10.0
+    force_lane_change: false
+    keep_right_rule: true
+
+route:
+  use_dynamic_generation: true
+
+  waypoints_file: '/workspace/config/routes/town02_v2/T02v2-B_left_j20_waypoints.txt'
+
+  sampling_resolution: 2.0
+
+  lookahead_distance: 50.0
+  num_waypoints_ahead: 25
+
+  use_relative_coordinates: true
+
+waypoints:
+  file_path: '/workspace/config/waypoints.txt'
+
+  lookahead_distance: 5.0
+  num_waypoints_ahead: 5
+  waypoint_spacing: 2.0
+
+  use_relative_coordinates: true
+
+episode:
+  max_time_steps: 1400
+  max_distance: 1000.0
+
+  termination:
+    on_collision: true
+    on_out_of_lane: true
+    on_timeout: true
+    on_goal_reached: true
+
+  success:
+    min_distance: 500.0
+    max_collisions: 0
+
+reward:
+  weights:
+    efficiency: 2.0
+    lane_keeping: 2.0
+    comfort: 1.0
+    safety: 0.3
+
+  efficiency:
+    target_speed: 8.33
+    speed_tolerance: 1.39
+    overspeed_penalty_scale: 2.0
+
+  lane_keeping:
+    lateral_tolerance: 0.5
+    heading_tolerance: 0.1
+
+  comfort:
+    weight: 0.5
+    jerk_threshold: 2.0
+
+  safety:
+    collision_penalty: -100
+    off_road_penalty: -50
+
+  time_penalty: -0.01
+
+logging:
+  enable_carla_logs: false
+  log_sensor_data: false
+  log_vehicle_state: true
+  log_rewards: true
+
+  draw_waypoints: false
+  draw_debug_info: false
+
+performance:
+  no_rendering_mode: false
+  quality_level: 'Low'
+
+  substepping: true
+  max_substeps: 10
+  max_substep_delta_time: 0.01
+
+  destroy_actors_on_exit: true
+  garbage_collection_interval: 100
+
+docker:
+  use_display: false
+  gpu_enabled: true
+  carla_root: '/home/carla/carla'
+  python_api_path: '/home/carla/carla/PythonAPI/carla'
+
+fixes:
+  spawn_heading_atan2: true
+  npc_exclusion_from_spawn_transform: true
+
+observation:
+  lateral_reference: route
+  extra_vector: [yaw_rate, lateral_velocity]
+
+simulation:
+  map: Town02

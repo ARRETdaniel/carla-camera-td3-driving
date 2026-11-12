@@ -1,0 +1,3 @@
+c453cd3f24668dbc0ca3864a1323cf81  H1_cand04_right_waypoints.txt
+1837804bfcb08bb78033a00fa12c8644  H2_cand24_left_waypoints.txt
+810d58d502271db4db770ecd2ec79317  H3_cand08_left_waypoints.txt

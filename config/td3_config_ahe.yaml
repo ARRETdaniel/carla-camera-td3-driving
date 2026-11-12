@@ -1,0 +1,181 @@
+algorithm:
+  name: 'TD3'
+
+  learning_rate: 0.0003
+  discount: 0.99
+  tau: 0.005
+
+  policy_noise: 0.2
+  noise_clip: 0.0
+  policy_freq: 1
+
+  batch_size: 256
+  buffer_size: 200000
+
+  learning_starts: 25000
+
+  exploration_action_repeat: 5
+
+  train_freq: 50
+  gradient_steps: 1
+
+  exploration_noise: 0.1
+
+  gradient_clipping:
+    enabled: true
+    actor_max_norm: 1.0
+    critic_max_norm: null
+    norm_type: 2.0
+
+networks:
+  cnn:
+    actor_cnn_lr: 0.001
+    critic_cnn_lr: 0.001
+    learning_rate: 0.001
+
+  actor:
+    hidden_layers: [256, 256]
+    activation: 'relu'
+    output_activation: 'tanh'
+    learning_rate: 0.001
+
+  critic:
+    hidden_layers: [256, 256]
+    activation: 'relu'
+    n_critics: 1
+    learning_rate: 0.001
+
+  cnn_extractor:
+    architecture: 'nature'
+
+    input_channels: 4
+    input_height: 84
+    input_width: 84
+
+    use_pretrained: false
+    freeze_features: false
+
+    features_dim: 512
+
+state:
+  image:
+    enabled: true
+    stack_frames: 4
+    grayscale: true
+    normalize: true
+    resize: [84, 84]
+
+  kinematic:
+    enabled: true
+    features:
+      - 'velocity'
+      - 'lateral_deviation'
+      - 'heading_error'
+    normalize: true
+
+  waypoints:
+    enabled: true
+    num_waypoints: 10
+    lookahead_distance: 50.0
+    relative_coords: true
+    normalize: true
+
+action:
+  type: 'continuous'
+  dim: 2
+
+  steering:
+    min: -1.0
+    max: 1.0
+
+  throttle_brake:
+    min: -1.0
+    max: 1.0
+
+  scale_steering: 1.0
+  scale_throttle_brake: 1.0
+
+reward:
+  weights:
+    efficiency: 2.0
+    lane_keeping: 2.0
+    comfort: 1.0
+    safety: 0.3
+    progress: 3.0
+
+  efficiency:
+    target_speed: 10.0
+    speed_tolerance: 2.0
+    overspeed_penalty_scale: 2.0
+
+  lane_keeping:
+    lateral_tolerance: 0.5
+    heading_tolerance: 0.1
+
+  comfort:
+    jerk_threshold: 3.0
+
+  safety:
+    collision_penalty: -100
+    offroad_penalty: -50
+    wrong_way_penalty: -5
+
+  progress:
+    waypoint_bonus: 1.0
+    distance_scale: 5.0
+    goal_reached_bonus: 100.0
+
+training:
+  max_timesteps: 2000000
+  max_episode_steps: 2000
+
+  save_freq: 10000
+  checkpoint_dir: './data/checkpoints/td3/'
+  save_replay_buffer: true
+
+  eval_freq: 10000
+  n_eval_episodes: 10
+  eval_deterministic: true
+
+  log_dir: './data/logs/td3/'
+  tensorboard: true
+  wandb:
+    enabled: true
+    project: 'td3-av-carla'
+    entity: null
+    tags: ['TD3', 'CARLA', 'Town01', 'visual-navigation']
+    notes: 'TD3 agent for end-to-end visual autonomous navigation'
+
+  verbose: 1
+
+evaluation:
+  n_episodes: 20
+  deterministic: true
+  render: false
+  record_video: true
+  video_dir: './data/videos/td3/'
+
+  metrics:
+    - 'success_rate'
+    - 'average_speed'
+    - 'completion_time'
+    - 'collision_count'
+    - 'offroad_count'
+    - 'avg_lateral_error'
+    - 'avg_heading_error'
+    - 'avg_jerk'
+    - 'avg_lateral_acceleration'
+    - 'min_ttc'
+
+device:
+  type: 'auto'
+  cuda_device_id: 0
+
+seed: 42
+deterministic_pytorch: true
+
+experiment:
+  algorithm: AHE
+  name: 'td3_visual_navigation_baseline'
+  description: 'TD3 agent for end-to-end visual autonomous navigation in CARLA Town01'
+  version: '1.0.0'

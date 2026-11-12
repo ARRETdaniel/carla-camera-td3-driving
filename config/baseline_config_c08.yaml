@@ -1,0 +1,44 @@
+baseline_controller:
+  pid:
+    kp: 0.5
+    ki: 0.3
+    kd: 0.13
+    integrator_min: 0.0
+    integrator_max: 2.0
+  pure_pursuit:
+    kp_lookahead: 0.8
+    min_lookahead: 6.0
+    wheelbase: 3.0
+  general:
+    target_speed_kmh: 30.0
+  phase2:
+    speed_profile: step
+    max_decel: 1.5
+    speed_lookahead: 20.0
+    pid_derivative_on: measurement
+evaluation:
+  num_episodes: 20
+  max_steps: 1000
+  fixed_delta_seconds: 0.05
+  map_name: Town01
+  waypoints_file: config/waypoints.txt
+  weather: ClearNoon
+  traffic:
+    num_vehicles: 50
+    num_pedestrians: 0
+  output_dir: results/baseline_evaluation
+  save_trajectory: true
+  save_images: false
+  metrics:
+  - success_rate
+  - avg_collisions_per_km
+  - avg_speed_kmh
+  - route_completion_time_s
+  - avg_longitudinal_jerk_m_s3
+  - avg_lateral_acceleration_m_s2
+  - ttc_analysis
+logging:
+  console_level: INFO
+  file_level: DEBUG
+  log_file: logs/baseline_evaluation.log
+  debug_controllers: false

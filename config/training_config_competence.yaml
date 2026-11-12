@@ -1,0 +1,320 @@
+scenarios:
+  - name: 'town01_light_traffic'
+    map: 'Town01'
+    num_vehicles: 20
+    num_pedestrians: 0
+    weather: 'ClearNoon'
+    max_episodes: 2000
+
+  - name: 'town01_medium_traffic'
+    map: 'Town01'
+    num_vehicles: 50
+    num_pedestrians: 0
+    weather: 'ClearNoon'
+    max_episodes: 2000
+
+  - name: 'town01_heavy_traffic'
+    map: 'Town01'
+    num_vehicles: 100
+    num_pedestrians: 0
+    weather: 'ClearNoon'
+    max_episodes: 2000
+
+episode:
+  max_steps: 1000
+
+reward:
+  weights:
+    efficiency: 2.0
+    lane_keeping: 2.0
+    comfort: 1.0
+    safety: 1.0
+    progress: 3.0
+
+  efficiency:
+    target_speed: 8.33
+    speed_tolerance: 1.39
+    overspeed_penalty_scale: 2.0
+    curvature_target:
+      enabled: true
+      a_lat: 3.0
+      a_dec: 2.0
+      v_cap: 8.33
+      half_window_m: 4.0
+    speed_tolerance_relative: 0.15
+
+  lane_keeping:
+    lateral_tolerance: 0.5
+    heading_tolerance: 0.1
+
+  comfort:
+    steering_smoothness_scale: 2.0
+    jerk_threshold: 5.0
+
+  safety:
+    collision_penalty_low: -5
+    collision_penalty_medium: -25
+    collision_penalty_high: -100
+    collision_low_speed_threshold: 2.0
+    collision_medium_speed_threshold: 5.0
+    off_road_penalty: -20
+    wrong_way_penalty: -5
+    lane_invasion_penalty: -10.0
+
+  progress:
+    waypoint_bonus: 1.0
+    distance_scale: 0.5
+    goal_reached_bonus: 150.0
+
+  gamma: 0.99
+
+  max_duration: 300.0
+  max_distance: 1000.0
+
+  success:
+    reach_goal: true
+    no_collision: true
+    stay_on_road: true
+    min_distance_ratio: 0.8
+
+  termination:
+    on_collision: true
+    on_offroad: true
+    offroad_tolerance_time: 3.0
+    wrong_way_tolerance_time: 5.0
+
+training:
+  total_timesteps: 2000000
+
+  random_start:
+    enabled: true
+    min_remaining_waypoints: 15
+
+  curriculum:
+    enabled: false
+    start_scenario: 'town01_light_traffic'
+    progression_criteria:
+      success_rate_threshold: 0.7
+      min_episodes: 500
+
+  phases:
+    - name: 'random_exploration'
+      timesteps: 25000
+      exploration: 'uniform_random'
+      update_networks: false
+
+    - name: 'active_learning'
+      timesteps: 1975000
+      exploration: 'gaussian_noise'
+      update_networks: true
+
+  checkpointing:
+    save_freq: 10000
+    keep_best: 5
+    keep_freq: 50000
+    save_final: true
+    save_replay_buffer: true
+    checkpoint_dir: './data/checkpoints/'
+
+  evaluation:
+    enabled: true
+    eval_freq: 5000
+    n_eval_episodes: 10
+    deterministic: true
+    record_video: false
+    log_metrics: true
+
+  early_stopping:
+    enabled: false
+    patience: 10
+    min_delta: 0.01
+    metric: 'success_rate'
+
+logging:
+  console:
+    verbose: 1
+    log_freq: 100
+
+  tensorboard:
+    enabled: true
+    log_dir: './data/logs/tensorboard/'
+    log_graph: false
+    log_interval: 100
+
+  wandb:
+    enabled: true
+    project: 'td3-av-carla'
+    entity: null
+    group: null
+    tags: []
+    notes: ''
+    save_code: true
+    monitor_gym: true
+    log_interval: 100
+
+  file:
+    enabled: true
+    log_dir: './data/logs/training/'
+    log_level: 'INFO'
+
+  metrics:
+    training:
+      - 'episode_reward'
+      - 'episode_length'
+      - 'actor_loss'
+      - 'critic_loss'
+      - 'q_value_mean'
+      - 'collision_rate'
+      - 'success_rate'
+
+    evaluation:
+      - 'mean_reward'
+      - 'std_reward'
+      - 'success_rate'
+      - 'mean_episode_length'
+      - 'collision_count'
+      - 'offroad_count'
+
+evaluation:
+  scenarios:
+    - name: 'test_light_traffic'
+      map: 'Town01'
+      num_vehicles: 20
+      num_pedestrians: 0
+      weather: 'ClearNoon'
+      n_episodes: 20
+
+    - name: 'test_medium_traffic'
+      map: 'Town01'
+      num_vehicles: 50
+      num_pedestrians: 0
+      weather: 'ClearNoon'
+      n_episodes: 20
+
+    - name: 'test_heavy_traffic'
+      map: 'Town01'
+      num_vehicles: 100
+      num_pedestrians: 0
+      weather: 'ClearNoon'
+      n_episodes: 20
+
+    - name: 'test_rain'
+      map: 'Town01'
+      num_vehicles: 50
+      num_pedestrians: 0
+      weather: 'WetCloudyNoon'
+      n_episodes: 10
+
+  deterministic: true
+  render: false
+  record_video: true
+  video_fps: 20
+  video_dir: './data/videos/evaluation/'
+
+  metrics:
+    safety:
+      - 'success_rate'
+      - 'collision_count'
+      - 'collisions_per_km'
+      - 'offroad_count'
+      - 'min_ttc'
+      - 'ttc_violations'
+
+    efficiency:
+      - 'average_speed'
+      - 'completion_time'
+      - 'route_completion_ratio'
+
+    comfort:
+      - 'avg_longitudinal_jerk'
+      - 'max_longitudinal_jerk'
+      - 'avg_lateral_acceleration'
+      - 'max_lateral_acceleration'
+
+    navigation:
+      - 'avg_lateral_error'
+      - 'avg_heading_error'
+      - 'lane_departure_count'
+
+  statistics:
+    compute_confidence_intervals: true
+    confidence_level: 0.95
+    min_episodes: 20
+
+  export:
+    csv: true
+    json: true
+    latex_table: true
+    output_dir: './data/results/'
+
+comparison:
+  agents:
+    - name: 'TD3'
+      config: './config/td3_config.yaml'
+      checkpoint: null
+
+    - name: 'DDPG'
+      config: './config/ddpg_config.yaml'
+      checkpoint: null
+
+  statistical_tests:
+    - 'mann_whitney_u'
+    - 'wilcoxon_signed_rank'
+    - 'anova'
+
+  visualization:
+    generate_plots: true
+    plot_types:
+      - 'learning_curves'
+      - 'success_rate_comparison'
+      - 'metric_distributions'
+      - 'radar_charts'
+    plot_dir: './data/plots/'
+    save_formats: ['png', 'pdf']
+
+resources:
+  gpu:
+    enabled: true
+    device_id: 0
+    memory_fraction: 0.8
+    allow_growth: true
+
+  cpu:
+    n_workers: 4
+    n_threads: 8
+
+  memory:
+    replay_buffer_on_gpu: false
+    pin_memory: true
+
+reproducibility:
+  seed: 42
+  deterministic_pytorch: true
+  deterministic_carla: true
+  set_all_seeds: true
+
+experiment:
+  name: 'td3_vs_ddpg_visual_navigation'
+  description: |
+    End-to-end visual autonomous navigation with TD3 and DDPG baseline.
+    Training on CARLA Town01 with 3 traffic density levels (20, 50, 100 NPCs).
+  version: '1.0.0'
+
+  tags:
+    - 'deep-reinforcement-learning'
+    - 'autonomous-vehicles'
+    - 'td3'
+    - 'ddpg'
+    - 'carla'
+    - 'visual-navigation'
+    - 'end-to-end'
+    - 'ieee-paper'
+
+  output_structure:
+    base_dir: './data/'
+    subdirs:
+      checkpoints: 'checkpoints/{agent}/{scenario}/'
+      logs: 'logs/{agent}/{scenario}/'
+      videos: 'videos/{agent}/{scenario}/'
+      results: 'results/{agent}/{scenario}/'
+      plots: 'plots/'
